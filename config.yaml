@@ -1,0 +1,56 @@
+# Central config — every script reads from this instead of hardcoding values.
+# Keeping tunables here means the go/no-go decision on Day 3 (full 3D vs. 2.5D
+# fallback) is a config change, not a code rewrite.
+
+data:
+  raw_dir: "data/raw/ISLES-2022"
+  processed_dir: "data/processed"
+  modalities: ["dwi", "adc"]        # FLAIR intentionally excluded — see README limitations
+  train_frac: 0.70
+  val_frac: 0.15
+  test_frac: 0.15
+  seed: 42
+
+preprocessing:
+  target_spacing: [2.0, 2.0, 2.0]   # median spacing across all 250 cases (see results/metrics/dataset_stats.csv)
+  crop_to_brain_bbox: true
+  intensity_clip_percentiles: [0.5, 99.5]
+  normalize: "zscore"               # per-volume z-score after clipping
+
+patching:
+  mode: "3d"                        # "3d" or "2p5d" — flip this if Day 3 checkpoint fails
+  patch_size: [64, 64, 64]          # used when mode == "3d"
+  slices_2p5d: 5                    # used when mode == "2p5d" — odd number of stacked adjacent slices
+  patches_per_volume: 8
+  foreground_ratio: 0.8             # fraction of sampled patches guaranteed to contain lesion voxels
+
+model:
+  in_channels: 2                    # dwi + adc
+  out_channels: 1
+  base_filters: 24                  # reduced from standard U-Net's 64
+  depth: 4                          # reduced from standard U-Net's 5
+  norm: "instance"
+  activation: "leaky_relu"
+
+training:
+  batch_size: 2
+  epochs: 100
+  lr: 0.0001
+  optimizer: "adam"
+  loss: "dice_bce"
+  mixed_precision: false            # was true — caused NaN loss on MPS after enough training steps;
+                                     # a single dummy forward pass isn't enough to catch this (see train.py)
+  device: "mps"                     # falls back to "cpu" automatically if unavailable
+  early_stopping_patience: 15       # epochs without val Dice improvement — stops on model quality
+  max_steps: null                   # optional hard cap on total TRAINING steps across all epochs —
+                                     # a compute-budget stop, independent of val Dice (null = no cap)
+  checkpoint_dir: "checkpoints"
+
+evaluation:
+  sliding_window_overlap: 0.5
+  metrics: ["dice", "iou", "sensitivity", "precision"]
+  results_dir: "results/metrics"
+
+visualization:
+  figures_dir: "results/figures"
+  n_example_cases: 6                 # spread across best/median/worst performers
