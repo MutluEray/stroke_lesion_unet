@@ -7,19 +7,7 @@ DWI/ADC brain MRI, benchmarked against published ISLES'22 baselines.
 > This README is the living index — update it each day rather than writing a
 > separate log.
 
-## Status
-
-- [x] Day 1 — data downloaded, environment set up, exploration done, compute go/no-go timed
-- [ ] Day 2 — preprocessing + patch sampling pipeline
-- [ ] Day 3 — model implemented, training started, feasibility checkpoint
-- [ ] Day 4 — training continued / fallback executed if needed
-- [ ] Day 5 — final model, full-volume evaluation vs. baselines
-- [ ] Day 6 — figures and visual deliverables
-- [ ] Day 7 — write-up, repo polish, ship
-
 ## Project structure
-
-Flat layout — everything at the top level, no `src/`/`configs/` nesting:
 
 ```
 stroke_lesion_unet/
@@ -70,17 +58,3 @@ python preprocess.py
   `[2.0, 2.0, 2.0]` mm, before patch extraction
 - **Compute check:** MPS timing test on the target patch size (64³) estimates
   ~0.1 min/epoch — full 3D patch training is feasible, no fallback to 2.5D needed
-
-## Results
-
-_Filled in on Day 5-6._
-
-| Model | Dice | IoU | Notes |
-|---|---|---|---|
-| This project | — | — | — |
-| ISLES'22 top team (SegResNet ensemble) | 0.824 | — | published, 15-model ensemble |
-
-## Limitations
-
-_Filled in on Day 7 — be specific: modalities used, split strategy, compute
-constraints, single vs. cross-validated run._
