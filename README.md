@@ -1,11 +1,8 @@
 # Ischemic Stroke Lesion Segmentation — 3D U-Net (ISLES 2022)
 
-Portfolio project: patch-based 3D U-Net for ischemic stroke lesion segmentation on
+Patch-based 3D U-Net for ischemic stroke lesion segmentation on
 DWI/ADC brain MRI, benchmarked against published ISLES'22 baselines.
 
-> Results, figures, and the full write-up will be filled in as the week progresses.
-> This README is the living index — update it each day rather than writing a
-> separate log.
 
 ## Project structure
 
@@ -13,24 +10,16 @@ DWI/ADC brain MRI, benchmarked against published ISLES'22 baselines.
 stroke_lesion_unet/
 ├── README.md
 ├── requirements.txt
-├── .gitignore
 ├── config.yaml               # all tunables in one place: paths, patch size, model, training
 ├── download_data.sh          # fetches ISLES-2022.zip from Zenodo, verifies checksum
-├── explore.py                # Day 1: dataset stats — dims, spacing, intensity, lesion volume dist.
-├── preprocess.py             # Day 2: crop to brain bbox, normalize, resample, train/val/test split
-├── dataset.py                # Day 2: PyTorch Dataset + foreground-biased patch sampler (TorchIO)
-├── model.py                  # Day 3: reduced 3D U-Net (also holds the 2.5D fallback model)
-├── train.py                  # Day 3-4: training loop, checkpointing, Dice+BCE loss
-├── evaluate.py                # Day 5: sliding-window inference, Dice/IoU vs. baselines
-├── visualize.py               # Day 6: overlay figures, results table
+├── explore.py                # dataset stats — dims, spacing, intensity, lesion volume dist.
+├── preprocess.py             #  crop to brain bbox, normalize, resample, train/val/test split
+├── dataset.py                # PyTorch Dataset + foreground-biased patch sampler (TorchIO)
+├── model.py                  # reduced 3D U-Net (also holds the 2.5D fallback model)
+├── train.py                  # training loop, checkpointing, Dice+BCE loss
+├── evaluate.py                # sliding-window inference, Dice/IoU vs. baselines
+├── visualize.py               # overlay figures, results table
 ├── utils.py                   # shared helpers (metrics, I/O, seeding)
-├── data/
-│   ├── raw/                  # ISLES-2022 extracted here (gitignored, not committed)
-│   └── processed/            # splits.json + cropped/normalized volumes (gitignored)
-├── checkpoints/               # saved model weights (gitignored)
-└── results/
-    ├── figures/               # final overlay images, comparison plots for README/site
-    └── metrics/                # dice_scores.csv, results_table.md
 ```
 
 ## Setup
@@ -46,8 +35,7 @@ python preprocess.py
 
 ## Data
 
-- **Dataset:** ISLES 2022 training set, 250 cases (DWI + ADC used; FLAIR dropped —
-  see limitations in the write-up)
+- **Dataset:** ISLES 2022 training set, 250 cases (DWI + ADC used; FLAIR dropped)
 - **Source:** https://zenodo.org/records/7153326 (1.7 GB, CC BY 4.0)
 - **Citation:** Hernandez Petzsche, M.R., de la Rosa, E., Hanning, U. et al.
   "ISLES 2022: A multi-center magnetic resonance imaging stroke lesion
@@ -56,5 +44,3 @@ python preprocess.py
 - **Spacing:** highly non-uniform across cases (7 distinct spacing profiles,
   slice thickness 2.0–4.8mm) — resampling to the dataset's median spacing,
   `[2.0, 2.0, 2.0]` mm, before patch extraction
-- **Compute check:** MPS timing test on the target patch size (64³) estimates
-  ~0.1 min/epoch — full 3D patch training is feasible, no fallback to 2.5D needed
